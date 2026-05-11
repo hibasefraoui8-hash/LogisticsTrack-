@@ -1,0 +1,179 @@
+{% extends 'base.html' %}
+
+{% block title %}Historique – LogisticsTrack{% endblock %}
+
+{% block extra_css %}
+<style>
+  :root {
+    --primary: #0A2540;
+    --accent: #FF5C00;
+    --accent2: #00C9A7;
+    --bg: #F4F6FA;
+    --card-bg: #FFFFFF;
+    --text: #1A1A2E;
+    --muted: #6B7280;
+    --border: #E5E9F2;
+  }
+
+  body {
+    background: var(--bg);
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .lt-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 22px;
+    margin-bottom: 20px;
+  }
+
+  .btn-lt-primary {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 8px 16px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .btn-lt-primary:hover { background: #e04f00; color: #fff; }
+
+  .btn-lt-secondary {
+    background: var(--bg);
+    color: var(--text);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 7px 14px;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .btn-lt-secondary:hover { border-color: var(--primary); color: var(--primary); }
+
+  /* Badges statut */
+  .badge-statut {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+  .badge-statut.preparation { background: #FFF8E1; color: #F59E0B; }
+  .badge-statut.expedie     { background: #E8F0FE; color: #3B82F6; }
+  .badge-statut.livraison   { background: #FFF0E8; color: var(--accent); }
+  .badge-statut.livre       { background: #E6FAF7; color: var(--accent2); }
+
+  /* Tableau simplifié */
+  .table-custom {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .table-custom th {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--muted);
+    border-bottom: 2px solid var(--border);
+    padding: 10px 8px;
+    text-align: left;
+  }
+  .table-custom td {
+    padding: 10px 8px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+  .table-custom tr:hover td {
+    background: var(--bg);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+  <!-- Carte filtre dates -->
+  <div class="lt-card">
+    <h5 class="mb-3"><i class="bi bi-calendar-range" style="color: var(--accent);"></i> Filtrer par période</h5>
+    <form method="get" action="{% url 'historique' %}" class="row g-3 align-items-end">
+      <div class="col-md-4">
+        <label class="form-label small text-muted text-uppercase fw-bold mb-1">Date de début</label>
+        <input type="date" name="date_debut" class="form-control form-control-sm" value="{{ date_debut|default:'' }}">
+      </div>
+      <div class="col-md-4">
+        <label class="form-label small text-muted text-uppercase fw-bold mb-1">Date de fin</label>
+        <input type="date" name="date_fin" class="form-control form-control-sm" value="{{ date_fin|default:'' }}">
+      </div>
+      <div class="col-md-4">
+        <button type="submit" class="btn-lt-primary w-100"><i class="bi bi-search"></i> Rechercher</button>
+      </div>
+      {% if date_debut or date_fin %}
+        <div class="col-12">
+          <a href="{% url 'historique' %}" class="btn-lt-secondary"><i class="bi bi-x-circle"></i> Effacer les filtres</a>
+        </div>
+      {% endif %}
+    </form>
+  </div>
+
+  <!-- Liste des colis -->
+  <div class="lt-card">
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap">
+      <h5 class="mb-0"><i class="bi bi-clock-history"></i> Historique des expéditions</h5>
+      <span class="text-muted small">{{ colis|length }} colis trouvé(s)</span>
+    </div>
+
+    {% if colis %}
+      <table class="table-custom">
+        <thead>
+          <tr>
+            <th>Date</th><th>Expéditeur</th><th>Destinataire</th><th>Poids</th><th>Statut</th><th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for c in colis %}
+          <tr>
+            <td>{{ c.date_envoi|date:"d/m/Y" }}</td>
+            <td>{{ c.expediteur.nom }}</td>
+            <td>{{ c.destinataire.nom }}</td>
+            <td>{{ c.poids }} kg</td>
+            <td>
+              <span class="badge-statut
+                {% if c.statut.libelle == 'EN_PREPARATION' or c.statut.libelle == 'En préparation' %}preparation
+                {% elif c.statut.libelle == 'EXPEDIE' or c.statut.libelle == 'Expédié' %}expedie
+                {% elif c.statut.libelle == 'EN_COURS_DE_LIVRAISON' or c.statut.libelle == 'En cours de livraison' %}livraison
+                {% elif c.statut.libelle == 'LIVRE' or c.statut.libelle == 'Livré' %}livre
+                {% endif %}">
+                {{ c.statut.get_libelle_display }}
+              </span>
+            </td>
+            <td>
+              <a href="{% url 'modifier_statut' c.id %}" class="btn-lt-secondary" style="padding: 4px 10px;">
+                <i class="bi bi-arrow-repeat"></i> Statut
+              </a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <div class="text-center py-5">
+        <i class="bi bi-inbox fs-1 text-muted"></i>
+        <p class="text-muted mt-2">Aucun colis trouvé pour cette période.</p>
+      </div>
+    {% endif %}
+  </div>
+  <a href="{% url 'liste_colis' %}" class="btn-lt-secondary">
+              <i class="bi bi-arrow-left"></i> Retour
+            </a>
+</div>
+{% endblock %}

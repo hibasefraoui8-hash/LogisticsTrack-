@@ -1,0 +1,274 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Détail du colis #{{ colis.id }} – LogisticsTrack{% endblock %}
+
+{% block extra_css %}
+<style>
+  :root {
+    --primary: #4F7A9E;
+    --accent: #FF5C00;
+    --accent2: #00C9A7;
+    --bg: #F4F6FA;
+    --border: #E5E9F2;
+    --muted: #6B7280;
+  }
+
+  body {
+    background: var(--bg);
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  /* Header similaire au dashboard client */
+  .client-header {
+    background: var(--primary);
+    padding: 20px 0;
+  }
+  .header-inner {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+  }
+  .brand-icon {
+    width: 38px;
+    height: 38px;
+    background: var(--accent);
+    border-radius: 10px;
+    display: grid;
+    place-items: center;
+    font-size: 1rem;
+    color: #fff;
+  }
+  .brand-name {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.15rem;
+    color: #fff;
+  }
+  .header-login {
+    font-size: .83rem;
+    color: rgba(255,255,255,.6);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .header-login:hover { color: #fff; }
+
+  /* Contenu */
+  .detail-container {
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 0 20px;
+  }
+
+  /* Carte tableau */
+  .card-table {
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    overflow: hidden;
+    margin-bottom: 24px;
+  }
+  .card-header {
+    background: var(--primary);
+    padding: 20px 28px;
+    color: white;
+  }
+  .card-header h2 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.4rem;
+    margin: 0;
+  }
+  .card-header p {
+    margin: 5px 0 0;
+    opacity: 0.8;
+    font-size: 0.85rem;
+  }
+
+  /* Style tableau propre */
+  .detail-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .detail-table tr {
+    border-bottom: 1px solid var(--border);
+  }
+  .detail-table tr:last-child {
+    border-bottom: none;
+  }
+  .detail-table th,
+  .detail-table td {
+    padding: 16px 20px;
+    vertical-align: top;
+  }
+  .detail-table th {
+    width: 140px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--muted);
+    background: #f9fafb;
+  }
+  .detail-table td {
+    font-size: 0.95rem;
+    color: var(--text);
+  }
+  .detail-table .badge-statut {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 12px;
+    border-radius: 30px;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+  .badge-preparation { background: #FFF8E1; color: #F59E0B; }
+  .badge-expedie     { background: #E8F0FE; color: #3B82F6; }
+  .badge-livraison   { background: #FFF0E8; color: var(--accent); }
+  .badge-livre       { background: #E6FAF7; color: var(--accent2); }
+
+  /* Timeline miniature (optionnelle) */
+  .timeline-mini {
+    margin-top: 0;
+  }
+  .step-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 12px;
+  }
+  .step-item {
+    flex: 1;
+    text-align: center;
+    position: relative;
+    font-size: 0.7rem;
+    color: var(--muted);
+  }
+  .step-item.active {
+    color: var(--accent);
+    font-weight: 600;
+  }
+  .step-item.done {
+    color: var(--accent2);
+    font-weight: 600;
+  }
+
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 8px;
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s;
+  }
+  .back-link:hover {
+    color: var(--accent);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="client-header">
+  <div class="header-inner">
+    <a href="{% url 'dashboard_client' %}" class="brand">
+      <div class="brand-icon"><i class="bi bi-box-seam-fill"></i></div>
+      <span class="brand-name">LogisticsTrack</span>
+    </a>
+    <a href="{% url 'login_agent' %}" class="header-login">
+      <i class="bi bi-lock"></i> Espace Agent
+    </a>
+  </div>
+</div>
+
+<div class="detail-container">
+  <div class="card-table">
+    <div class="card-header">
+      <h2>Colis #{{ colis.id }}</h2>
+      <p>Détails complets de l'expédition</p>
+    </div>
+    <table class="detail-table">
+      <tr>
+        <th>Expéditeur</th>
+        <td>{{ colis.expediteur.nom }}</td>
+      </tr>
+      <tr>
+        <th>Destinataire</th>
+        <td>{{ colis.destinataire.nom }}</td>
+      </tr>
+      <tr>
+        <th>Adresse de livraison</th>
+        <td>{{ colis.destinataire.adresse }}</td>
+      </tr>
+      <tr>
+        <th>Poids</th>
+        <td>{{ colis.poids }} kg</td>
+      </tr>
+      <tr>
+        <th>Date d'envoi</th>
+        <td>{{ colis.date_envoi|date:"d/m/Y" }}</td>
+      </tr>
+      <tr>
+        <th>Statut actuel</th>
+        <td>
+          {% with code=colis.statut.libelle %}
+            {% if code == 'EN_PREPARATION' %}
+              <span class="badge-statut badge-preparation"><i class="bi bi-hourglass-split"></i> En préparation</span>
+            {% elif code == 'EXPEDIE' %}
+              <span class="badge-statut badge-expedie"><i class="bi bi-send-fill"></i> Expédié</span>
+            {% elif code == 'EN_COURS_DE_LIVRAISON' %}
+              <span class="badge-statut badge-livraison"><i class="bi bi-truck"></i> En cours de livraison</span>
+            {% elif code == 'LIVRE' %}
+              <span class="badge-statut badge-livre"><i class="bi bi-check-circle-fill"></i> Livré</span>
+            {% else %}
+              <span class="badge-statut badge-preparation">{{ code }}</span>
+            {% endif %}
+          {% endwith %}
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- Mini progression (optionnelle) -->
+  <div class="card-table">
+    <div class="card-header" style="background: #f8f9fa; color: var(--primary); border-bottom: 1px solid var(--border);">
+      <h2 style="font-size: 1rem; margin:0;">Avancement</h2>
+    </div>
+    <div style="padding: 20px;">
+      <div class="step-row">
+        {% with code=colis.statut.libelle %}
+        <div class="step-item {% if code == 'EN_PREPARATION' %}active{% elif code == 'EXPEDIE' or code == 'EN_COURS_DE_LIVRAISON' or code == 'LIVRE' %}done{% endif %}">
+          En préparation
+        </div>
+        <div class="step-item {% if code == 'EXPEDIE' %}active{% elif code == 'EN_COURS_DE_LIVRAISON' or code == 'LIVRE' %}done{% endif %}">
+          Expédié
+        </div>
+        <div class="step-item {% if code == 'EN_COURS_DE_LIVRAISON' %}active{% elif code == 'LIVRE' %}done{% endif %}">
+          En cours
+        </div>
+        <div class="step-item {% if code == 'LIVRE' %}active done{% endif %}">
+          Livré
+        </div>
+        {% endwith %}
+      </div>
+    </div>
+  </div>
+
+  <a href="{% url 'dashboard_client' %}" class="back-link">
+    <i class="bi bi-arrow-left"></i> Retour à la recherche
+  </a>
+</div>
+{% endblock %}

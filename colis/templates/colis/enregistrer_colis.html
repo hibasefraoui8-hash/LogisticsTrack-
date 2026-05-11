@@ -1,0 +1,140 @@
+{% extends 'base.html' %}
+
+{% block title %}
+  {% if form.instance.pk %}Modifier le colis #{{ form.instance.pk }}{% else %}Nouveau colis{% endif %}
+{% endblock %}
+
+{% block extra_css %}
+<style>
+  :root {
+    --primary:  #0A2540;
+    --accent:   #FF5C00;
+    --accent2:  #00C9A7;
+    --bg:       #F4F6FA;
+    --card-bg:  #FFFFFF;
+    --text:     #1A1A2E;
+    --muted:    #6B7280;
+    --border:   #E5E9F2;
+  }
+
+  body {
+    background: var(--bg);
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .lt-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 22px;
+    margin-bottom: 20px;
+  }
+
+  .btn-lt-primary {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 20px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    cursor: pointer;
+  }
+  .btn-lt-primary:hover { background: #e04f00; }
+
+  .btn-lt-secondary {
+    background: var(--bg);
+    color: var(--text);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 9px 15px;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    cursor: pointer;
+    text-decoration: none;
+  }
+  .btn-lt-secondary:hover { border-color: var(--primary); }
+
+  .lt-form input,
+  .lt-form select,
+  .lt-form textarea {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    background: var(--bg);
+  }
+  .lt-form input:focus,
+  .lt-form select:focus {
+    border-color: var(--accent);
+    outline: none;
+    background: white;
+  }
+  .lt-form label {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+  .errorlist {
+    color: #dc2626;
+    font-size: 0.75rem;
+    list-style: none;
+    padding-left: 0;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+      <div class="lt-card">
+        <h4 class="mb-3">
+          <i class="bi bi-box-seam me-2"></i>
+          {% if form.instance.pk %}Modifier le colis #{{ form.instance.pk }}{% else %}Enregistrer un colis{% endif %}
+        </h4>
+
+        <form method="post" class="lt-form">
+          {% csrf_token %}
+
+          {% for field in form %}
+            <div class="mb-3">
+              {{ field.label_tag }}
+              {{ field }}
+              {% if field.help_text %}
+                <div class="form-text text-muted small">{{ field.help_text }}</div>
+              {% endif %}
+              {{ field.errors }}
+            </div>
+          {% endfor %}
+
+          <hr class="my-4">
+          <div class="d-flex justify-content-end gap-2">
+            <a href="{% url 'liste_colis' %}" class="btn-lt-secondary">Annuler</a>
+            <button type="submit" class="btn-lt-primary">
+              <i class="bi bi-check-lg"></i> Enregistrer
+            </button>
+          </div>
+        </form>
+
+        {% if not form.instance.pk %}
+        <div class="text-center mt-3">
+          <small class="text-muted">
+            Client introuvable ? <a href="{% url 'ajouter_client' %}" style="color: var(--accent);">Ajouter un client</a>
+          </small>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

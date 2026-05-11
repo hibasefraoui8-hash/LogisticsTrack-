@@ -1,0 +1,409 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Suivi de colis – LogisticsTrack{% endblock %}
+
+{% block extra_css %}
+<style>
+  :root {
+    --primary: #4F7A9E;
+    --accent:  #FF5C00;
+    --accent2: #00C9A7;
+    --bg:      #F4F6FA;
+    --border:  #E5E9F2;
+    --muted:   #6B7280;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    min-height: 100vh;
+  }
+
+  /* Header */
+  .client-header {
+    background: var(--primary);
+    padding: 20px 0;
+  }
+  .header-inner {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+  }
+  .brand-icon {
+    width: 38px; height: 38px;
+    background: var(--accent);
+    border-radius: 10px;
+    display: grid;
+    place-items: center;
+    font-size: 1rem;
+    color: #fff;
+  }
+  .brand-name {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.15rem;
+    color: #fff;
+  }
+  .header-login {
+    font-size: .83rem;
+    color: rgba(255,255,255,.6);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .header-login:hover { color: #fff; }
+
+  /* Hero section */
+  .hero-section {
+    background: var(--primary);
+    padding: 60px 24px 80px;
+    text-align: center;
+  }
+  .hero-section h1 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 2.2rem;
+    color: #fff;
+    margin-bottom: 12px;
+  }
+  .hero-section p {
+    color: rgba(255,255,255,.55);
+    font-size: .95rem;
+    margin-bottom: 36px;
+  }
+
+  /* Search bar */
+  .search-bar-wrap {
+    max-width: 540px;
+    margin: 0 auto;
+    position: relative;
+  }
+  .search-bar-wrap form {
+    display: flex;
+    background: #fff;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 8px 40px rgba(0,0,0,.18);
+  }
+  .search-bar-wrap input {
+    flex: 1;
+    border: none;
+    outline: none;
+    padding: 16px 20px;
+    font-size: 1rem;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--primary);
+  }
+  .search-bar-wrap button {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    padding: 16px 24px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: .9rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .search-bar-wrap button:hover { background: #e04f00; }
+
+  /* Content area */
+  .content-area {
+    max-width: 900px;
+    margin: -32px auto 60px;
+    padding: 0 24px;
+  }
+
+  /* Result cards */
+  .result-card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 14px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.05);
+    transition: box-shadow .2s, border-color .2s;
+    text-decoration: none;
+    display: block;
+    color: inherit;
+  }
+  .result-card:hover {
+    border-color: var(--accent);
+    box-shadow: 0 6px 20px rgba(255,92,0,.1);
+  }
+
+  /* Badges */
+  .badge-statut {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 14px;
+    border-radius: 20px;
+    font-size: .78rem;
+    font-weight: 600;
+  }
+  .badge-statut.preparation { background: #FFF8E1; color: #F59E0B; }
+  .badge-statut.expedie     { background: #E8F0FE; color: #3B82F6; }
+  .badge-statut.livraison   { background: #FFF0E8; color: var(--accent); }
+  .badge-statut.livre       { background: #E6FAF7; color: var(--accent2); }
+
+  /* Mini progress track */
+  .mini-track {
+    display: flex;
+    align-items: center;
+    margin-top: 16px;
+    gap: 0;
+  }
+  .mini-step {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+  }
+  .mini-step::after {
+    content: '';
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    right: -50%;
+    height: 2px;
+    background: var(--border);
+    z-index: 0;
+  }
+  .mini-step:last-child::after { display: none; }
+  .mini-step.done::after { background: var(--accent2); }
+
+  .mini-dot {
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    background: #fff;
+    display: grid;
+    place-items: center;
+    font-size: .6rem;
+    z-index: 1;
+    position: relative;
+  }
+  .mini-step.done .mini-dot {
+    background: var(--accent2);
+    border-color: var(--accent2);
+    color: #fff;
+  }
+  .mini-step.current .mini-dot {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+    box-shadow: 0 0 0 4px rgba(255,92,0,.18);
+  }
+  .mini-label {
+    font-size: .6rem;
+    color: var(--muted);
+    margin-top: 5px;
+    text-align: center;
+  }
+  .mini-step.done .mini-label,
+  .mini-step.current .mini-label {
+    color: var(--primary);
+    font-weight: 600;
+  }
+
+  /* Empty / info cards */
+  .empty-state {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 48px 24px;
+    text-align: center;
+  }
+  .info-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-top: 40px;
+  }
+  .info-card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px;
+    text-align: center;
+  }
+  .info-card i {
+    font-size: 1.8rem;
+    color: var(--accent);
+    margin-bottom: 10px;
+    display: block;
+  }
+  .info-card h3 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: .9rem;
+    color: var(--primary);
+    margin-bottom: 6px;
+  }
+  .info-card p {
+    font-size: .78rem;
+    color: var(--muted);
+    margin: 0;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="client-header">
+  <div class="header-inner">
+    <a href="#" class="brand">
+      <div class="brand-icon"><i class="bi bi-box-seam-fill"></i></div>
+      <span class="brand-name">LogisticsTrack</span>
+    </a>
+    <a href="{% url 'login_agent' %}" class="header-login">
+      <i class="bi bi-lock"></i> Espace Agent
+    </a>
+  </div>
+
+  <div class="hero-section">
+    <h1>Suivez votre colis<br>en temps réel</h1>
+    <p>Entrez le nom de l'expéditeur ou du destinataire pour retrouver votre expédition.</p>
+    <div class="search-bar-wrap">
+      <form method="GET" action="{% url 'dashboard_client' %}">
+        <input type="text" name="q"
+               placeholder="Nom de l'expéditeur ou destinataire…"
+               value="{{ query|default:'' }}"
+               autocomplete="off">
+        <button type="submit">
+          <i class="bi bi-search"></i> Rechercher
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="content-area">
+  {% if query %}
+    {% if colis %}
+      <div style="font-family:'Syne',sans-serif; font-weight:700; color:var(--primary); margin-bottom:16px; font-size:1.05rem;">
+        {{ colis|length }} résultat{{ colis|pluralize }} pour « {{ query }} »
+      </div>
+
+      {% for c in colis %}
+        {% with code=c.statut.libelle %}
+        <a href="{% url 'detail_colis' c.id %}" class="result-card">
+          <div class="d-flex align-items-start justify-content-between flex-wrap gap-3">
+            <div>
+              <div style="font-weight:600; font-size:1rem; color:var(--primary); margin-bottom:4px;">
+                {{ c.expediteur.nom }}
+                <i class="bi bi-arrow-right mx-2" style="color:var(--accent); font-size:.85rem;"></i>
+                {{ c.destinataire.nom }}
+              </div>
+              <div style="font-size:.8rem; color:var(--muted);">
+                <i class="bi bi-box-seam me-1"></i>{{ c.poids }} kg
+                &nbsp;·&nbsp;
+                <i class="bi bi-calendar3 me-1"></i>{{ c.date_envoi|date:"d/m/Y" }}
+                &nbsp;·&nbsp;
+                <i class="bi bi-geo-alt me-1"></i>{{ c.destinataire.adresse }}
+              </div>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+              {% if code == 'EN_PREPARATION' %}
+                <span class="badge-statut preparation"><i class="bi bi-hourglass-split"></i> En préparation</span>
+              {% elif code == 'EXPEDIE' %}
+                <span class="badge-statut expedie"><i class="bi bi-send-fill"></i> Expédié</span>
+              {% elif code == 'EN_COURS_DE_LIVRAISON' %}
+                <span class="badge-statut livraison"><i class="bi bi-truck"></i> En cours de livraison</span>
+              {% elif code == 'LIVRE' %}
+                <span class="badge-statut livre"><i class="bi bi-check-circle-fill"></i> Livré</span>
+              {% else %}
+                <span class="badge-statut preparation">{{ code }}</span>
+              {% endif %}
+              <i class="bi bi-chevron-right" style="color:var(--muted);"></i>
+            </div>
+          </div>
+
+          <!-- Timeline corrigée : comparaison avec les codes -->
+          <div class="mini-track">
+            <!-- Étape 1 : En préparation -->
+            <div class="mini-step
+              {% if code == 'EN_PREPARATION' %}current
+              {% elif code == 'EXPEDIE' or code == 'EN_COURS_DE_LIVRAISON' or code == 'LIVRE' %}done
+              {% endif %}">
+              <div class="mini-dot"><i class="bi bi-hourglass-split"></i></div>
+              <span class="mini-label">En préparation</span>
+            </div>
+            <!-- Étape 2 : Expédié -->
+            <div class="mini-step
+              {% if code == 'EXPEDIE' %}current
+              {% elif code == 'EN_COURS_DE_LIVRAISON' or code == 'LIVRE' %}done
+              {% endif %}">
+              <div class="mini-dot"><i class="bi bi-send-fill"></i></div>
+              <span class="mini-label">Expédié</span>
+            </div>
+            <!-- Étape 3 : En cours de livraison -->
+            <div class="mini-step
+              {% if code == 'EN_COURS_DE_LIVRAISON' %}current
+              {% elif code == 'LIVRE' %}done
+              {% endif %}">
+              <div class="mini-dot"><i class="bi bi-truck"></i></div>
+              <span class="mini-label">En cours</span>
+            </div>
+            <!-- Étape 4 : Livré -->
+            <div class="mini-step
+              {% if code == 'LIVRE' %}current done
+              {% endif %}">
+              <div class="mini-dot"><i class="bi bi-check-lg"></i></div>
+              <span class="mini-label">Livré</span>
+            </div>
+          </div>
+        </a>
+        {% endwith %}
+      {% endfor %}
+    {% else %}
+      <div class="empty-state">
+        <div style="font-size:3rem; color:var(--border); margin-bottom:12px;"><i class="bi bi-search"></i></div>
+        <div style="font-family:'Syne',sans-serif; font-weight:700; font-size:1.1rem; color:var(--primary); margin-bottom:8px;">
+          Aucun colis trouvé
+        </div>
+        <div style="color:var(--muted); font-size:.875rem;">
+          Vérifiez l'orthographe du nom ou contactez notre service client.
+        </div>
+      </div>
+    {% endif %}
+  {% else %}
+    <div class="info-cards">
+      <div class="info-card">
+        <i class="bi bi-hourglass-split"></i>
+        <h3>En Préparation</h3>
+        <p>Votre colis est en cours de traitement dans notre entrepôt.</p>
+      </div>
+      <div class="info-card">
+        <i class="bi bi-send-fill"></i>
+        <h3>Expédié</h3>
+        <p>Votre colis a quitté notre entrepôt et est en route.</p>
+      </div>
+      <div class="info-card">
+        <i class="bi bi-truck"></i>
+        <h3>En Livraison</h3>
+        <p>Votre colis est en cours de livraison vers son destinataire.</p>
+      </div>
+      <div class="info-card">
+        <i class="bi bi-check-circle-fill" style="color:var(--accent2)"></i>
+        <h3>Livré</h3>
+        <p>Votre colis a été remis avec succès au destinataire.</p>
+      </div>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

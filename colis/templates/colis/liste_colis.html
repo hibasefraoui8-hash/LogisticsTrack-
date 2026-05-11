@@ -1,0 +1,345 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Liste des colis – LogisticsTrack{% endblock %}
+
+{% block extra_css %}
+<style>
+  :root {
+    --primary:  #0A2540;
+    --accent:   #FF5C00;
+    --accent2:  #00C9A7;
+    --bg:       #F4F6FA;
+    --card-bg:  #FFFFFF;
+    --text:     #1A1A2E;
+    --muted:    #6B7280;
+    --border:   #E5E9F2;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    margin: 0;
+  }
+
+  /* Sidebar */
+  .sidebar {
+    width: 240px;
+    min-height: 100vh;
+    background: #4F7A9E;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+  }
+
+  .sidebar-logo {
+    padding: 26px 22px 18px;
+    border-bottom: 1px solid rgba(255,255,255,.08);
+  }
+  .sidebar-logo a {
+    font-family: 'Syne', sans-serif;
+    font-weight: 600;
+    font-size: 1.15rem;
+    color: #fff;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .brand-icon {
+    width: 34px; height: 34px;
+    background: var(--accent);
+    border-radius: 9px;
+    display: grid;
+    place-items: center;
+    font-size: .95rem;
+    color: #fff;
+  }
+
+  .nav-section-label {
+    font-size: .6rem;
+    font-weight: 600;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,.28);
+    padding: 16px 22px 5px;
+  }
+  .sidebar-nav a {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 9px 22px;
+    color: #CBD5E1;
+    font-size: .875rem;
+    text-decoration: none;
+    transition: background .15s, color .15s;
+    position: relative;
+  }
+  .sidebar-nav a i { width: 18px; text-align: center; font-size: 1rem; }
+  .sidebar-nav a:hover {
+    background: rgba(255,255,255,.06);
+    color: #fff;
+  }
+  .sidebar-nav a.active {
+    color: #fff;
+    font-weight: 600;
+  }
+  .sidebar-nav a.active::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--accent);
+    border-radius: 0 2px 2px 0;
+  }
+
+  .sidebar-footer {
+    padding: 14px 22px;
+    border-top: 1px solid rgba(255,255,255,.08);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: auto;
+  }
+  .user-avatar {
+    width: 32px; height: 32px;
+    background: var(--accent2);
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-size: .78rem;
+    font-weight: 700;
+    color: #fff;
+  }
+  .user-name { font-size: .8rem; color: #fff; font-weight: 500; }
+  .user-role { font-size: .67rem; color: rgba(255,255,255,.38); }
+  .btn-logout {
+    margin-left: auto;
+    color: rgba(255,255,255,.38);
+    font-size: 1rem;
+    text-decoration: none;
+  }
+  .btn-logout:hover { color: #ff6b6b; }
+
+  /* Topbar */
+  .topbar {
+    background: var(--card-bg);
+    border-bottom: 1px solid var(--border);
+    padding: 0 26px;
+    height: 58px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .topbar-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: .95rem;
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .page-content { padding: 26px; flex: 1; }
+
+  /* Tables, cartes, badges */
+  .lt-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 22px;
+  }
+  .badge-statut {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 11px;
+    border-radius: 20px;
+    font-size: .73rem;
+    font-weight: 600;
+  }
+  .badge-statut.EN_PREPARATION { background: #FFF8E1; color: #F59E0B; }
+  .badge-statut.EXPEDIE { background: #E8F0FE; color: #3B82F6; }
+  .badge-statut.EN_COURS_DE_LIVRAISON { background: #FFF0E8; color: var(--accent); }
+  .badge-statut.LIVRE { background: #E6FAF7; color: var(--accent2); }
+
+  .lt-table { width: 100%; border-collapse: collapse; }
+  .lt-table thead th {
+    font-size: .68rem;
+    font-weight: 600;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    border-bottom: 2px solid var(--border);
+    padding: 9px 14px;
+    background: var(--bg);
+  }
+  .lt-table tbody tr { border-bottom: 1px solid var(--border); transition: background .12s; }
+  .lt-table tbody tr:hover { background: var(--bg); }
+  .lt-table tbody td { padding: 12px 14px; font-size: .862rem; vertical-align: middle; }
+
+  /* Boutons */
+  .btn-lt-primary {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 6px 12px;
+    font-size: .78rem;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .btn-lt-secondary {
+    background: var(--bg);
+    color: var(--text);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 6px 12px;
+    font-size: .78rem;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .btn-lt-danger {
+    background: #FEE8E8;
+    color: #EF4444;
+    border: none;
+    border-radius: 10px;
+    padding: 6px 12px;
+    font-size: .78rem;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .btn-lt-primary:hover { background: #e04f00; color: #fff; }
+  .btn-lt-secondary:hover { border-color: var(--primary); color: var(--primary); }
+  .btn-lt-danger:hover { background: #EF4444; color: #fff; }
+
+  .search-bar input, .search-bar select {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 8px 12px;
+    font-size: .85rem;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex">
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <a href="{% url 'liste_colis' %}">
+        <div class="brand-icon"><i class="bi bi-box-seam-fill"></i></div>
+        <span>LogisticsTrack</span>
+      </a>
+    </div>
+    <div class="sidebar-nav">
+      <div class="nav-section-label">MENU</div>
+      <a href="{% url 'liste_colis' %}" class="active"><i class="bi bi-grid"></i> Dashboard</a>
+      <a href="{% url 'enregistrer_colis' %}"><i class="bi bi-plus-circle"></i> Nouveau colis</a>
+      <a href="{% url 'ajouter_client' %}"><i class="bi bi-person-plus"></i> Ajouter client</a>
+      <a href="{% url 'historique' %}"><i class="bi bi-clock-history"></i> Historique</a>
+    </div>
+    <div class="sidebar-footer">
+      <div class="user-avatar"><i class="bi bi-person-badge"></i></div>
+      <div>
+        <div class="user-name">{{ user.username }}</div>
+        <div class="user-role">Agent</div>
+      </div>
+      <a href="{% url 'logout_agent' %}" class="btn-logout"><i class="bi bi-box-arrow-right"></i></a>
+    </div>
+  </div>
+
+  <!-- Main content -->
+  <div class="flex-grow-1 d-flex flex-column">
+    <div class="topbar">
+      <div class="topbar-title">
+        <i class="bi bi-house"></i>
+        <span class="sep">/</span>
+        <span>Colis</span>
+      </div>
+      <div>
+        <span class="text-muted small">Bienvenue, {{ user.username }}</span>
+      </div>
+    </div>
+    <div class="page-content">
+      <div class="lt-card">
+        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+          <h5 class="mb-0"><i class="bi bi-boxes"></i> Liste des colis</h5>
+          <div class="d-flex gap-2">
+            <a href="{% url 'enregistrer_colis' %}" class="btn-lt-primary"><i class="bi bi-plus-lg"></i> Nouveau</a>
+            <a href="{% url 'ajouter_client' %}" class="btn-lt-secondary"><i class="bi bi-person-add"></i> Client</a>
+          </div>
+        </div>
+
+        <!-- Formulaire de recherche -->
+        <form method="GET" action="{% url 'rechercher' %}" class="search-bar row g-2 mb-4">
+          <div class="col-md-5">
+            <input type="text" name="q" class="form-control form-control-sm" placeholder="Nom expéditeur ou destinataire" value="{{ query|default:'' }}">
+          </div>
+          <div class="col-md-4">
+            <select name="statut" class="form-select form-select-sm">
+              <option value="">Tous les statuts</option>
+              <option value="EN_PREPARATION" {% if statut == 'EN_PREPARATION' %}selected{% endif %}>En préparation</option>
+              <option value="EXPEDIE" {% if statut == 'EXPEDIE' %}selected{% endif %}>Expédié</option>
+              <option value="EN_COURS_DE_LIVRAISON" {% if statut == 'EN_COURS_DE_LIVRAISON' %}selected{% endif %}>En cours de livraison</option>
+              <option value="LIVRE" {% if statut == 'LIVRE' %}selected{% endif %}>Livré</option>
+            </select>
+          </div>
+          <div class="col-md-3">
+            <button type="submit" class="btn-lt-primary w-100"><i class="bi bi-search"></i> Filtrer</button>
+          </div>
+        </form>
+
+        {% if colis %}
+          <div class="table-responsive">
+            <table class="lt-table">
+              <thead>
+                <tr>
+                  <th>ID</th><th>Expéditeur</th><th>Destinataire</th><th>Poids (kg)</th><th>Frais (€)</th><th>Statut</th><th>Date d'envoi</th><th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for c in colis %}
+                <tr>
+                  <td>{{ c.id }}</td>
+                  <td>{{ c.expediteur.nom }}</td>
+                  <td>{{ c.destinataire.nom }}</td>
+                  <td>{{ c.poids }}</td>
+                  <td>{{ c.frais }}</td>
+                  <td>
+                    <span class="badge-statut {{ c.statut.libelle }}">
+                      {{ c.statut.get_libelle_display }}
+                    </span>
+                  </td>
+                  <td>{{ c.date_envoi|date:"d/m/Y" }}</td>
+                  <td>
+                    <div class="d-flex gap-1">
+                      <a href="{% url 'modifier_colis' c.id %}" class="btn-lt-secondary" title="Modifier"><i class="bi bi-pencil"></i></a>
+                      <a href="{% url 'modifier_statut' c.id %}" class="btn-lt-secondary" title="Changer statut"><i class="bi bi-arrow-repeat"></i></a>
+                      <a href="{% url 'supprimer_colis' c.id %}" class="btn-lt-danger" onclick="return confirm('Supprimer ce colis ?')" title="Supprimer"><i class="bi bi-trash"></i></a>
+                    </div>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <div class="alert alert-info mt-3">Aucun colis trouvé.</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

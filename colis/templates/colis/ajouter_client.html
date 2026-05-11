@@ -1,0 +1,149 @@
+{% extends 'base.html' %}
+
+{% block title %}Ajouter un client – LogisticsTrack{% endblock %}
+
+{% block extra_css %}
+<style>
+  /* Variables de couleur (reprises de base.html si absentes) */
+  :root {
+    --primary: #0A2540;
+    --accent: #FF5C00;
+    --accent2: #00C9A7;
+    --bg: #F4F6FA;
+    --card-bg: #FFFFFF;
+    --text: #1A1A2E;
+    --muted: #6B7280;
+    --border: #E5E9F2;
+  }
+
+  /* Carte */
+  .lt-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 22px;
+    margin-bottom: 20px;
+  }
+
+  /* Boutons */
+  .btn-lt-primary {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 20px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 0.86rem;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    cursor: pointer;
+  }
+  .btn-lt-primary:hover { background: #e04f00; color: #fff; }
+
+  .btn-lt-secondary {
+    background: var(--bg);
+    color: var(--text);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 9px 15px;
+    font-size: 0.86rem;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    cursor: pointer;
+  }
+  .btn-lt-secondary:hover { border-color: var(--primary); color: var(--primary); }
+
+  /* Champs de formulaire */
+  .lt-form input,
+  .lt-form select,
+  .lt-form textarea {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    background: var(--bg);
+  }
+  .lt-form input:focus,
+  .lt-form select:focus,
+  .lt-form textarea:focus {
+    border-color: var(--accent);
+    outline: none;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(255,92,0,0.1);
+  }
+  .lt-form label {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+  .errorlist {
+    color: #dc2626;
+    font-size: 0.75rem;
+    list-style: none;
+    padding-left: 0;
+    margin-top: 4px;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+
+      <!-- Carte avec bordure orange supérieure -->
+      <div class="lt-card" style="border-top: 4px solid var(--accent);">
+        <div class="d-flex align-items-center gap-3 mb-4">
+          <div style="background: rgba(255,92,0,0.1); padding: 10px; border-radius: 50%;">
+            <i class="bi bi-person-badge fs-2" style="color: var(--accent);"></i>
+          </div>
+          <div>
+            <h4 class="mb-0">Nouveau client</h4>
+            <p class="text-muted small mb-0">Expéditeur ou destinataire</p>
+          </div>
+        </div>
+
+        <form method="post" class="lt-form">
+          {% csrf_token %}
+
+          {% for field in form %}
+            <div class="mb-3">
+              {{ field.label_tag }}
+              {{ field }}
+              {{ field.errors }}
+            </div>
+          {% endfor %}
+
+          <hr class="my-4">
+          <div class="d-flex justify-content-between gap-2">
+            <a href="{% url 'liste_colis' %}" class="btn-lt-secondary">
+              <i class="bi bi-arrow-left"></i> Retour
+            </a>
+            <button type="submit" class="btn-lt-primary">
+              <i class="bi bi-save"></i> Enregistrer
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <div class="text-center mt-3">
+        <small class="text-muted">
+          Déjà un client ? <a href="{% url 'enregistrer_colis' %}" style="color: var(--accent);">Créer un colis</a>
+        </small>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}
